@@ -30,8 +30,9 @@
       >
         <span
           class="text-lg font-bold text-blue-800 tracking-wide truncate w-full"
-          >{{ name }}</span
         >
+          {{ name }}
+        </span>
         <Button
           icon="pi pi-trash"
           severity="warn"
@@ -43,14 +44,9 @@
       </li>
     </ul>
 
-    <!-- Wheel Canvas with Pointer -->
-    <div v-if="names.length > 0" class="relative">
-      <canvas
-        ref="canvas"
-        width="400"
-        height="400"
-        class="rounded-full"
-      ></canvas>
+    <!-- Wheel -->
+    <div v-if="names.length" class="relative">
+      <canvas ref="canvas" width="400" height="400" class="rounded-full" />
       <div
         class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
       >
@@ -67,6 +63,8 @@
         ></div>
       </div>
     </div>
+
+    <!-- Winner Dialog -->
     <Dialog
       v-model:visible="showWinner"
       modal
@@ -86,14 +84,15 @@ import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
 import confetti from "canvas-confetti";
 
+// Refs
 const canvas = ref<HTMLCanvasElement | null>(null);
-const ctx = ref<CanvasRenderingContext2D | null>(null);
-
 const names = ref<string[]>([]);
 const newName = ref("");
 const isSpinning = ref(false);
 const showWinner = ref(false);
 const winner = ref("");
+
+// State
 let rotation = 0;
 let spinVelocity = 0.01;
 let animationFrameId: number;
@@ -101,9 +100,9 @@ let manualSpin = false;
 let animationRunning = true;
 
 const addName = () => {
-  const trimmed = newName.value.trim();
-  if (trimmed && !names.value.includes(trimmed)) {
-    names.value.push(trimmed);
+  const name = newName.value.trim();
+  if (name && !names.value.includes(name)) {
+    names.value.push(name);
     newName.value = "";
     drawWheel();
   }
@@ -115,29 +114,32 @@ const removeName = (index: number) => {
 };
 
 const drawWheel = () => {
-  if (!canvas.value) return;
-  const ctx = canvas.value.getContext("2d");
+  const el = canvas.value;
+  if (!el) return;
+
+  const ctx = el.getContext("2d");
   if (!ctx) return;
 
-  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
-  const centerX = canvas.value.width / 2;
-  const centerY = canvas.value.height / 2;
-  const radius = centerX;
+  const { width, height } = el;
+  const center = width / 2;
+  const radius = center;
   const anglePerSlice = (2 * Math.PI) / names.value.length;
 
-  names.value.forEach((name, index) => {
-    const startAngle = rotation + index * anglePerSlice;
-    const endAngle = startAngle + anglePerSlice;
+  ctx.clearRect(0, 0, width, height);
+
+  names.value.forEach((name, i) => {
+    const start = rotation + i * anglePerSlice;
+    const end = start + anglePerSlice;
 
     ctx.beginPath();
-    ctx.moveTo(centerX, centerY);
-    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.fillStyle = `hsl(${(index * 30 + 200) % 360}, 80%, 70%)`;
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, start, end);
+    ctx.fillStyle = `hsl(${(i * 30 + 200) % 360}, 80%, 70%)`;
     ctx.fill();
 
     ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate(startAngle + anglePerSlice / 2);
+    ctx.translate(center, center);
+    ctx.rotate(start + anglePerSlice / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "white";
     ctx.font = "bold 1.5rem sans-serif";
@@ -148,13 +150,16 @@ const drawWheel = () => {
 
 const spinWheel = () => {
   if (isSpinning.value || names.value.length < 2) return;
+
   manualSpin = true;
   isSpinning.value = true;
   spinVelocity = Math.random() * 0.3 + 0.3;
+  animationRunning = true;
 };
 
 const animate = () => {
   if (!animationRunning) return;
+
   rotation += spinVelocity;
   spinVelocity *= manualSpin ? 0.97 : 1;
   drawWheel();
@@ -162,8 +167,7 @@ const animate = () => {
   if (manualSpin && spinVelocity <= 0.002) {
     isSpinning.value = false;
     spinVelocity = 0;
-    const selected = getSelectedName();
-    winner.value = selected;
+    winner.value = getSelectedName();
     showWinner.value = true;
     triggerConfetti();
     manualSpin = false;
@@ -174,17 +178,13 @@ const animate = () => {
   animationFrameId = requestAnimationFrame(animate);
 };
 
-const stopAnimation = () => {
-  animationRunning = false;
-  cancelAnimationFrame(animationFrameId);
-};
-
 const getSelectedName = () => {
   const index =
     Math.floor(
       ((2 * Math.PI - (rotation % (2 * Math.PI))) / (2 * Math.PI)) *
         names.value.length
     ) % names.value.length;
+
   return names.value[index];
 };
 
@@ -196,15 +196,8 @@ const triggerConfetti = () => {
   });
 };
 
-onMounted(() => {
-  drawWheel();
-  animationRunning = true;
-  animate();
-});
-
-watch(names, drawWheel, { deep: true });
-
 const resetApp = () => {
+  cancelAnimationFrame(animationFrameId);
   names.value = [];
   newName.value = "";
   winner.value = "";
@@ -216,6 +209,14 @@ const resetApp = () => {
   drawWheel();
   animate();
 };
+
+// Lifecycle
+onMounted(() => {
+  drawWheel();
+  animate();
+});
+
+watch(names, drawWheel, { deep: true });
 </script>
 
 <style scoped>
