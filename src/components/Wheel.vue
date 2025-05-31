@@ -1,90 +1,11 @@
-<template>
-  <div class="flex flex-col items-center p-6 gap-6">
-    <h1 class="text-2xl font-bold cursor-pointer" @click="resetApp">
-      🎡 Spin to Decide!
-    </h1>
-
-    <!-- Input and Add Button -->
-    <div class="flex gap-3">
-      <InputText
-        v-model="newName"
-        :maxlength="10"
-        placeholder="Enter option"
-        @keyup.enter="addName"
-      />
-      <Button
-        label="Add"
-        severity="info"
-        variant="text"
-        raised
-        @click="addName"
-      />
-    </div>
-
-    <!-- Names List -->
-    <ul class="max-w-md">
-      <li
-        v-for="(name, index) in names"
-        :key="index"
-        class="flex justify-between items-center py-1 text-black gap-2"
-      >
-        <span
-          class="text-lg font-bold text-blue-800 tracking-wide truncate w-full"
-        >
-          {{ name }}
-        </span>
-        <Button
-          icon="pi pi-trash"
-          severity="warn"
-          rounded
-          aria-label="Delete"
-          size="small"
-          @click="removeName(index)"
-        />
-      </li>
-    </ul>
-
-    <!-- Wheel -->
-    <div v-if="names.length" class="relative">
-      <canvas ref="canvas" width="400" height="400" class="rounded-full" />
-      <div
-        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
-      >
-        <button
-          class="w-12 h-12 bg-white font-semibold shadow hover:scale-105 transition"
-          @click="spinWheel"
-        ></button>
-      </div>
-      <div
-        class="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-full"
-      >
-        <div
-          class="w-0 h-0 border-t-[15px] border-t-transparent border-b-[15px] border-b-transparent border-r-[30px] border-r-red-600 pointer-events-none"
-        ></div>
-      </div>
-    </div>
-
-    <!-- Winner Dialog -->
-    <Dialog
-      v-model:visible="showWinner"
-      modal
-      header="🎉 Winner!"
-      @hide="resetApp"
-      :style="{ width: '12rem' }"
-    >
-      <p class="text-xl font-bold text-center">{{ winner }}</p>
-    </Dialog>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
+import Card from "primevue/card";
 import confetti from "canvas-confetti";
 
-// Refs
 const canvas = ref<HTMLCanvasElement | null>(null);
 const names = ref<string[]>([]);
 const newName = ref("");
@@ -92,7 +13,6 @@ const isSpinning = ref(false);
 const showWinner = ref(false);
 const winner = ref("");
 
-// State
 let rotation = 0;
 let spinVelocity = 0.01;
 let animationFrameId: number;
@@ -210,7 +130,6 @@ const resetApp = () => {
   animate();
 };
 
-// Lifecycle
 onMounted(() => {
   drawWheel();
   animate();
@@ -218,6 +137,94 @@ onMounted(() => {
 
 watch(names, drawWheel, { deep: true });
 </script>
+
+<template>
+  <div class="flex flex-col items-center p-6 gap-6">
+    <h1 class="text-2xl font-bold cursor-pointer" @click="resetApp">
+      🎡 Spin to Decide!
+    </h1>
+
+    <!-- Input and Add Button -->
+    <div class="flex gap-3">
+      <InputText
+        v-model="newName"
+        :maxlength="10"
+        placeholder="Enter option"
+        @keyup.enter="addName"
+      />
+      <Button
+        label="Add"
+        severity="info"
+        variant="text"
+        raised
+        @click="addName"
+      />
+    </div>
+
+    <!-- Names List -->
+    <ul class="max-w-md">
+      <li
+        v-for="(name, index) in names"
+        :key="index"
+        class="flex justify-between items-center py-1 text-black gap-2"
+      >
+        <span
+          class="text-lg font-bold text-blue-800 tracking-wide truncate w-full"
+        >
+          {{ name }}
+        </span>
+        <Button
+          icon="pi pi-trash"
+          severity="warn"
+          rounded
+          aria-label="Delete"
+          size="small"
+          @click="removeName(index)"
+        />
+      </li>
+    </ul>
+
+    <!-- Wheel -->
+    <div v-if="names.length" class="relative">
+      <canvas ref="canvas" width="400" height="400" class="rounded-full" />
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
+      >
+        <button
+          class="w-12 h-12 bg-white font-semibold shadow hover:scale-105 transition"
+          @click="spinWheel"
+        ></button>
+      </div>
+      <div
+        class="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-full"
+      >
+        <div
+          class="w-0 h-0 border-t-[15px] border-t-transparent border-b-[15px] border-b-transparent border-r-[30px] border-r-red-600 pointer-events-none"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Winner Dialog -->
+    <Dialog
+      v-model:visible="showWinner"
+      modal
+      header="🎉 Winner!"
+      @hide="resetApp"
+      :style="{ width: '12rem' }"
+    >
+      <p class="text-xl font-bold text-center">{{ winner }}</p>
+    </Dialog>
+  </div>
+
+  <Card style="overflow: hidden; padding: 0.5rem 1rem">
+    <template #footer>
+      <div class="flex gap-2 mt-1 justify-around !text-primary">
+        <p>Created by Ali Gök</p>
+        <p>© 2025 Copyright</p>
+      </div>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 canvas {
