@@ -232,7 +232,7 @@ watch(names, drawWheel, { deep: true });
         <Button
           icon="pi pi-trash"
           severity="danger"
-          aria-label="Delete"
+          :aria-label="`Delete ${name}`"
           size="small"
           @click="removeName(index)"
         />
