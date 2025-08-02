@@ -1,5 +1,5 @@
 {
-  "name": "decide_mate_app",
+  "name": "decision-mate",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,7 +13,6 @@
     "@primevue/themes": "^4.3.4",
     "@tailwindcss/vite": "^4.1.8",
     "canvas-confetti": "^1.9.3",
-    "pinia": "^3.0.2",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.4",
     "tailwindcss": "^4.1.8",
