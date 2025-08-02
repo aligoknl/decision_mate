@@ -2,7 +2,6 @@
 import { ref, onMounted, watch, computed, nextTick } from "vue";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import IftaLabel from "primevue/IftaLabel";
 import Dialog from "primevue/dialog";
 import Card from "primevue/card";
 import confetti from "canvas-confetti";
@@ -13,7 +12,7 @@ const newName = ref("");
 const isSpinning = ref(false);
 const showWinner = ref(false);
 const winner = ref("");
-const validationMessage = ref("");
+const validationMessage = ref(null as string | null);
 const canSpin = ref(true);
 const liveAnnouncement = ref("");
 
@@ -181,32 +180,32 @@ watch(names, drawWheel, { deep: true });
     <h1 class="text-2xl font-bold">🎡 Spin to Decide!</h1>
 
     <!-- Input and Add Button -->
-    <div class="flex gap-3">
-      <div class="flex flex-col gap-1">
-        <IftaLabel>
-          <InputText
-            id="username"
-            v-model="newName"
-            :maxlength="10"
-            @keyup.enter="addName"
-            variant="filled"
-            autocomplete="off"
-            :aria-describedby="validationMessage ? 'input-error' : ''"
-          />
-          <label for="username">Enter option (max 10 chars)</label>
-        </IftaLabel>
-        <p
-          v-if="validationMessage"
-          id="input-error"
-          class="text-red-600 text-sm mt-1"
-          aria-live="assertive"
-          role="alert"
-          aria-atomic="true"
-        >
-          {{ validationMessage }}
-        </p>
-      </div>
+    <div class="flex flex-col gap-1">
+      <label for="username" class="text-sm font-medium text-gray-700">
+        Enter option (max 10 chars)
+      </label>
+      <InputText
+        id="username"
+        v-model="newName"
+        :maxlength="10"
+        @keyup.enter="addName"
+        variant="filled"
+        autocomplete="off"
+        :aria-describedby="validationMessage ? 'input-error' : null"
+        class="w-full"
+      />
     </div>
+
+    <!-- Validation message -->
+    <p
+      v-if="validationMessage"
+      id="input-error"
+      class="text-red-600 text-sm"
+      role="alert"
+    >
+      {{ validationMessage }}
+    </p>
+
     <Button
       label="Add"
       severity="contrast"
@@ -251,7 +250,6 @@ watch(names, drawWheel, { deep: true });
           @click="spinWheel"
         >
           {{ spinButtonText }}
-          <i class="pi pi-spin pi-spinner" v-if="isSpinning" />
         </button>
         <p v-else aria-live="assertive" role="alert" class="text-slate-700">
           Please add at least two options to spin!
