@@ -191,7 +191,7 @@ watch(names, drawWheel, { deep: true });
         @keyup.enter="addName"
         variant="filled"
         autocomplete="off"
-        :aria-describedby="validationMessage ? 'input-error' : null"
+        :aria-describedby="validationMessage ? 'input-error' : ''"
         class="w-full"
       />
     </div>
